@@ -12,3 +12,8 @@ output "windows_function_app_id" {
   description = "Outputs the function app id"
   value = azurerm_windows_function_app.windows-function.id
 }
+
+output "windows_function_umi" {
+  description = "The User Managed Identity that was created for this function"
+  value = try(module.windows-function-umi[0], null)
+}

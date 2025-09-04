@@ -4,7 +4,13 @@ resource "azurerm_windows_function_app" "windows-function" {
   resource_group_name = local.resource_group_name
   service_plan_id     = local.asp
 
-  app_settings                                   = try(var.windows_function.app_settings, {})
+  app_settings                                   = merge(
+                                                      { 
+                                                        "AZURE_CLIENT_ID" = try(module.windows-function-umi[0].umi-client-id, null),
+                                                        "WEBSITE_LOAD_ROOT_CERTIFICATES" = try(var.windows_function.inject_root_cert, false) ? "8EBD38E4D2A40158C4CA179E791D239D7F520F0A" : null,
+                                                      },
+                                                      try(var.windows_function.app_settings, {}), # from the caller, allow overriding of the client id
+                                                  )
   builtin_logging_enabled                        = try(var.windows_function.builtin_logging_enabled, true)
   client_certificate_enabled                     = try(var.windows_function.client_certificate_enabled, false)
   client_certificate_mode                        = try(var.windows_function.client_certificate_mode, "Optional")
@@ -15,13 +21,18 @@ resource "azurerm_windows_function_app" "windows-function" {
   functions_extension_version                    = try(var.windows_function.functions_extension_version, "~4")
   ftp_publish_basic_authentication_enabled       = try(var.windows_function.ftp_publish_basic_authentication_enabled, false)
   https_only                                     = try(var.windows_function.https_only, true)
-  public_network_access_enabled                  = try(var.windows_function.public_network_access_enabled, true)
+  public_network_access_enabled                  = try(var.windows_function.public_network_access_enabled, false)
   key_vault_reference_identity_id                = try(var.windows_function.key_vault_reference_identity_id, null)
   storage_account_access_key                     = try(var.windows_function.storage_account_access_key, null)
   storage_account_name                           = local.storage_account_name
-  storage_uses_managed_identity                  = try(var.windows_function.storage_uses_managed_identity, null)
+  storage_uses_managed_identity                  = (
+                                                      # if we are creating the managed identity and custom storage,
+                                                      # we are also giving it access to the storage
+                                                      try(var.windows_function.create_user_managed_identity, false) && try(var.windows_function.custom_storage_account, null) != null
+                                                      ? true : try(var.windows_function.storage_uses_managed_identity, null)
+                                                    )
   storage_key_vault_secret_id                    = try(var.windows_function.storage_key_vault_secret_id, null)
-  virtual_network_subnet_id                      = try(var.windows_function.virtual_network_subnet_id, null)
+  virtual_network_subnet_id                      = try(local.subnet_id, null)
   webdeploy_publish_basic_authentication_enabled = try(var.windows_function.webdeploy_publish_basic_authentication_enabled, true)
   vnet_image_pull_enabled                        = try(var.windows_function.vnet_image_pull_enabled, true)
   zip_deploy_file                                = try(var.windows_function.zip_deploy_file, null)
@@ -33,8 +44,8 @@ resource "azurerm_windows_function_app" "windows-function" {
     api_definition_url                            = try(var.windows_function.site_config.api_definition_url, null)
     api_management_api_id                         = try(var.windows_function.site_config.api_management_api_id, null)
     app_command_line                              = try(var.windows_function.site_config.app_command_line, null)
-    app_scale_limit                               = try(var.windows_function.app_scale_limit, null)
-    application_insights_connection_string        = try(var.windows_function.application_insights_connection_string, null)
+    app_scale_limit                               = try(var.windows_function.site_config.app_scale_limit, var.windows_function.app_scale_limit, null)
+    application_insights_connection_string        = try(var.windows_function.site_config.application_insights_connection_string, var.windows_function.application_insights_connection_string, null)
     application_insights_key                      = try(var.windows_function.site_config.application_insights_key, null)
     default_documents                             = try(var.windows_function.site_config.default_documents, null)
     elastic_instance_minimum                      = try(var.windows_function.site_config.elastic_instance_minimum, null)
@@ -357,10 +368,16 @@ resource "azurerm_windows_function_app" "windows-function" {
   }
 
   dynamic "identity" {
-    for_each = try(var.windows_function.identity, null) != null ? [1] : []
+    for_each = try(var.windows_function.create_user_managed_identity, false) ? [{
+      type = "UserAssigned"
+      identity_ids = [ module.windows-function-umi[0].umi-id ]
+    }] : try(var.windows_function.identity, null) != null ? [{
+      type = var.windows_function.identity.type
+      identity_ids = var.windows_function.identity.identity_ids
+    }] : []
     content {
-      type         = var.windows_function.identity.type
-      identity_ids = try(var.windows_function.identity.identity_ids, null)
+      type         = identity.value.type
+      identity_ids = identity.value.identity_ids
     }
   }
 
@@ -383,4 +400,38 @@ resource "azurerm_windows_function_app" "windows-function" {
       connection_string_names = try(sticky_settings.value.connection_string_names, null)
     }
   }
+}
+
+# Calls this module if we need a private endpoint attached to the storage account
+module "private_endpoint" {
+  source = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-private_endpoint.git?ref=v1.0.2"
+  for_each =  try(var.windows_function.private_endpoint, {}) 
+
+  name = "${local.func-name}-${each.key}"
+  location = var.location
+  resource_groups = var.resource_groups
+  subnets = var.subnets
+  private_connection_resource_id = azurerm_windows_function_app.windows-function.id
+  private_endpoint = each.value
+  private_dns_zone_ids = var.private_dns_zone_ids
+  tags = var.tags
+}
+
+locals {
+  cert_url = strcontains(var.env, "G3") ? "https://g3pceslzresentdfa0353e.blob.core.windows.net/publicresources/GOC-GDC-ROOT-A.crt" : "https://gcpcenteslzpublicblob4df.blob.core.windows.net/publicresources/GOC-GDC-ROOT-A.crt" 
+}
+
+data "http" "cert" {
+  for_each = { for url in [local.cert_url]: "GOC-GDC-ROOT-A" => url if try(var.windows_function.inject_root_cert, false) }
+  url = each.value
+}
+
+resource "azurerm_app_service_public_certificate" "internal-ca" {
+  for_each = data.http.cert
+
+  app_service_name     = azurerm_windows_function_app.windows-function.name
+  resource_group_name  = azurerm_windows_function_app.windows-function.resource_group_name
+  certificate_name     = each.key
+  certificate_location = "Unknown"
+  blob                 = each.value.response_body_base64
 }
