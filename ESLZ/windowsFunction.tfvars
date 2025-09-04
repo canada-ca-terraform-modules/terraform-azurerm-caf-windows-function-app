@@ -67,7 +67,7 @@ windows-functions = {
       #   #   registry_username = ""
       #   #   registry_password = ""
       #   # }
-      #   dotnet_version              = "9.0"
+      #   dotnet_version              = "v9.0"
       #   use_dotnet_isolated_runtime = "false"
       #   java_version                = "17"
       #   node_version                = "20"
