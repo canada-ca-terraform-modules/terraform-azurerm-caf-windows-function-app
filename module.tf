@@ -82,7 +82,7 @@ resource "azurerm_windows_function_app" "windows-function" {
     }
 
     dynamic "app_service_logs" {
-      for_each = try(var.windows_function.site_config.app_service_logs, null) != null ? [1] : []
+      for_each = try(var.windows_function.site_config.app_service_logs, null) != null ? [var.windows_function.site_config.app_service_logs] : []
       content {
         disk_quota_mb         = try(app_service_logs.value.disk_quota_mb, 35)
         retention_period_days = try(app_service_logs.value.retention_period_days, null)
@@ -90,7 +90,7 @@ resource "azurerm_windows_function_app" "windows-function" {
     }
 
     dynamic "cors" {
-      for_each = try(var.windows_function.site_config.cors, null) != null ? [1] : []
+      for_each = try(var.windows_function.site_config.cors, null) != null ? [var.windows_function.site_config.cors] : []
       content {
         allowed_origins     = try(cors.value.allowed_origins, null)
         support_credentials = try(cors.value.support_credentials, false)
@@ -98,7 +98,7 @@ resource "azurerm_windows_function_app" "windows-function" {
     }
 
     dynamic "ip_restriction" {
-      for_each = try(var.windows_function.site_config.ip_restriction, null) != null ? [1] : []
+      for_each = try(var.windows_function.site_config.ip_restriction, {})
       content {
         action                    = try(ip_restriction.value.action, "Deny")
         ip_address                = try(ip_restriction.value.ip_address, null)
@@ -108,7 +108,7 @@ resource "azurerm_windows_function_app" "windows-function" {
         virtual_network_subnet_id = try(ip_restriction.value.virtual_network_subnet_id, null)
         description               = try(ip_restriction.value.description, null)
         dynamic "headers" {
-          for_each = try(ip_restriction.value.headers, null) != null ? [1] : []
+          for_each = try(ip_restriction.value.headers, null) != null ? [ip_restriction.value.headers] : []
           content {
             x_azure_fdid      = try(headers.value.x_azure_fdid, null)
             x_fd_health_probe = try(headers.value.x_fd_health_probe, null)
@@ -120,7 +120,7 @@ resource "azurerm_windows_function_app" "windows-function" {
     }
 
     dynamic "scm_ip_restriction" {
-      for_each = try(var.windows_function.site_config.scm_ip_restriction, null) != null ? [1] : []
+      for_each = try(var.windows_function.site_config.scm_ip_restriction, {})
       content {
         action                    = try(scm_ip_restriction.value.action, "Deny")
         ip_address                = try(scm_ip_restriction.value.ip_address, null)
@@ -130,7 +130,7 @@ resource "azurerm_windows_function_app" "windows-function" {
         virtual_network_subnet_id = try(scm_ip_restriction.value.virtual_network_subnet_id, null)
         description               = try(scm_ip_restriction.value.description, null)
         dynamic "headers" {
-          for_each = try(scm_ip_restriction.value.headers, null) != null ? [1] : []
+          for_each = try(scm_ip_restriction.value.headers, null) != null ? [scm_ip_restriction.value.headers] : []
           content {
             x_azure_fdid      = try(headers.value.x_azure_fdid, null)
             x_fd_health_probe = try(headers.value.x_fd_health_probe, null)
@@ -143,7 +143,7 @@ resource "azurerm_windows_function_app" "windows-function" {
   }
 
   dynamic "auth_settings" {
-    for_each = try(var.windows_function.auth_settings, null) != null ? [1] : []
+    for_each = try(var.windows_function.auth_settings, null) != null ? [var.windows_function.auth_settings] : []
     content {
       enabled                        = auth_settings.value.enabled
       additional_login_parameters    = try(auth_settings.value.additional_login_parameters, null)
@@ -156,7 +156,7 @@ resource "azurerm_windows_function_app" "windows-function" {
       unauthenticated_client_action  = try(auth_settings.value.unauthenticated_client_action, null)
 
       dynamic "active_directory" {
-        for_each = try(auth_settings.value.active_directory, null) != null ? [1] : []
+        for_each = try(auth_settings.value.active_directory, null) != null ? [auth_settings.value.active_directory] : []
         content {
           client_id                  = active_directory.value.client_id
           allowed_audiences          = try(active_directory.value.allowed_audiences, null)
@@ -165,7 +165,7 @@ resource "azurerm_windows_function_app" "windows-function" {
         }
       }
       dynamic "facebook" {
-        for_each = try(auth_settings.value.facebook, null) != null ? [1] : []
+        for_each = try(auth_settings.value.facebook, null) != null ? [auth_settings.value.facebook] : []
         content {
           app_id                  = facebook.value.app_id
           app_secret              = try(facebook.value.app_secret, null)
@@ -174,7 +174,7 @@ resource "azurerm_windows_function_app" "windows-function" {
         }
       }
       dynamic "github" {
-        for_each = try(auth_settings.value.github, null) != null ? [1] : []
+        for_each = try(auth_settings.value.github, null) != null ? [auth_settings.value.github] : []
         content {
           client_id                  = github.value.client_id
           client_secret              = try(github.value.client_secret, null)
@@ -183,7 +183,7 @@ resource "azurerm_windows_function_app" "windows-function" {
         }
       }
       dynamic "google" {
-        for_each = try(auth_settings.value.google, null) != null ? [1] : []
+        for_each = try(auth_settings.value.google, null) != null ? [auth_settings.value.google] : []
         content {
           client_id                  = google.value.client_id
           client_secret              = try(google.value.client_secret, null)
@@ -192,7 +192,7 @@ resource "azurerm_windows_function_app" "windows-function" {
         }
       }
       dynamic "microsoft" {
-        for_each = try(auth_settings.value.microsoft, null) != null ? [1] : []
+        for_each = try(auth_settings.value.microsoft, null) != null ? [auth_settings.value.microsoft] : []
         content {
           client_id                  = microsoft.value.client_id
           client_secret              = try(microsoft.value.client_secret, null)
@@ -201,7 +201,7 @@ resource "azurerm_windows_function_app" "windows-function" {
         }
       }
       dynamic "twitter" {
-        for_each = try(auth_settings.value.twitter, null) != null ? [1] : []
+        for_each = try(auth_settings.value.twitter, null) != null ? [auth_settings.value.twitter] : []
         content {
           consumer_key                 = twitter.value.consumer_key
           consumer_secret              = try(twitter.value.consumer_secret, null)
@@ -212,7 +212,7 @@ resource "azurerm_windows_function_app" "windows-function" {
   }
 
   dynamic "auth_settings_v2" {
-    for_each = try(var.windows_function.auth_settings, null) != null ? [1] : []
+    for_each = try(var.windows_function.auth_settings, null) != null ? [var.windows_function.auth_settings] : []
     content {
       auth_enabled                            = try(auth_settings_v2.value.auth_enabled, false)
       runtime_version                         = try(auth_settings_v2.value.runtime_version, "~1")
@@ -242,7 +242,7 @@ resource "azurerm_windows_function_app" "windows-function" {
       }
 
       dynamic "apple_v2" {
-        for_each = try(auth_settings_v2.value.apple_v2, null) != null ? [1] : []
+        for_each = try(auth_settings_v2.value.apple_v2, null) != null ? [auth_settings_v2.value.apple_v2] : []
         content {
           client_id                  = apple_v2.value.client_id
           client_secret_setting_name = apple_v2.value.client_secret_setting_name
@@ -251,7 +251,7 @@ resource "azurerm_windows_function_app" "windows-function" {
       }
 
       dynamic "active_directory_v2" {
-        for_each = try(auth_settings_v2.value.active_directory_v2, null) != null ? [1] : []
+        for_each = try(auth_settings_v2.value.active_directory_v2, null) != null ? [auth_settings_v2.value.active_directory_v2] : []
         content {
           client_id                            = active_directory_v2.value.client_id
           tenant_auth_endpoint                 = active_directory_v2.value.tenant_auth_endpoint
@@ -269,14 +269,14 @@ resource "azurerm_windows_function_app" "windows-function" {
       }
 
       dynamic "azure_static_web_app_v2" {
-        for_each = try(auth_settings_v2.value.azure_static_web_app_v2, null) != null ? [1] : []
+        for_each = try(auth_settings_v2.value.azure_static_web_app_v2, null) != null ? [auth_settings_v2.value.azure_static_web_app_v2] : []
         content {
           client_id = azure_static_web_app_v2.value.client_id
         }
       }
 
       dynamic "custom_oidc_v2" {
-        for_each = try(auth_settings_v2.value.custom_oidc_v2, null) != null ? [1] : []
+        for_each = try(auth_settings_v2.value.custom_oidc_v2, null) != null ? [auth_settings_v2.value.custom_oidc_v2] : []
         content {
           name                          = custom_oidc_v2.value.name
           client_id                     = custom_oidc_v2.value.client_id
@@ -293,7 +293,7 @@ resource "azurerm_windows_function_app" "windows-function" {
       }
 
       dynamic "facebook_v2" {
-        for_each = try(auth_settings_v2.value.facebook_v2, null) != null ? [1] : []
+        for_each = try(auth_settings_v2.value.facebook_v2, null) != null ? [auth_settings_v2.value.facebook_v2] : []
         content {
           app_id                  = facebook_v2.value.app_id
           app_secret_setting_name = facebook_v2.value.app_secret_setting_name
@@ -303,7 +303,7 @@ resource "azurerm_windows_function_app" "windows-function" {
       }
 
       dynamic "github_v2" {
-        for_each = try(auth_settings_v2.value.github_v2, null) != null ? [1] : []
+        for_each = try(auth_settings_v2.value.github_v2, null) != null ? [auth_settings_v2.value.github_v2] : []
         content {
           client_id                  = github_v2.value.client_id
           client_secret_setting_name = github_v2.value.client_secret_setting_name
@@ -312,7 +312,7 @@ resource "azurerm_windows_function_app" "windows-function" {
       }
 
       dynamic "google_v2" {
-        for_each = try(auth_settings_v2.value.google_v2, null) != null ? [1] : []
+        for_each = try(auth_settings_v2.value.google_v2, null) != null ? [auth_settings_v2.value.google_v2] : []
         content {
           client_id                  = google_v2.value.client_id
           client_secret_setting_name = google_v2.value.client_secret_setting_name
@@ -322,7 +322,7 @@ resource "azurerm_windows_function_app" "windows-function" {
       }
 
       dynamic "microsoft_v2" {
-        for_each = try(auth_settings_v2.value.microsoft_v2, null) != null ? [1] : []
+        for_each = try(auth_settings_v2.value.microsoft_v2, null) != null ? [auth_settings_v2.value.microsoft_v2] : []
         content {
           client_id                  = microsoft_v2.value.client_id
           client_secret_setting_name = microsoft_v2.value.client_secret_setting_name
@@ -332,7 +332,7 @@ resource "azurerm_windows_function_app" "windows-function" {
       }
 
       dynamic "twitter_v2" {
-        for_each = try(auth_settings_v2.value.twitter_v2, null) != null ? [1] : []
+        for_each = try(auth_settings_v2.value.twitter_v2, null) != null ? [auth_settings_v2.value.twitter_v2] : []
         content {
           consumer_key                 = twitter_v2.value.consumer_key
           consumer_secret_setting_name = twitter_v2.value.consumer_secret_setting_name
@@ -342,7 +342,7 @@ resource "azurerm_windows_function_app" "windows-function" {
   }
 
   dynamic "backup" {
-    for_each = try(var.windows_function.backup, null) != null ? [1] : []
+    for_each = try(var.windows_function.backup, null) != null ? [var.windows_function.backup] : []
     content {
       name                = backup.key
       storage_account_url = backup.value.storage_account_url
@@ -359,7 +359,7 @@ resource "azurerm_windows_function_app" "windows-function" {
   }
 
   dynamic "connection_string" {
-    for_each = try(var.windows_function.connection_string, null) != null ? [1] : []
+    for_each = try(var.windows_function.connection_string, {})
     content {
       name  = connection_string.key
       type  = connection_string.value.type
@@ -382,7 +382,7 @@ resource "azurerm_windows_function_app" "windows-function" {
   }
 
   dynamic "storage_account" {
-    for_each = try(var.windows_function.storage_account, null) != null ? [1] : []
+    for_each = try(var.windows_function.storage_account, {})
     content {
       access_key   = storage_account.value.access_key
       account_name = storage_account.value.account_name
@@ -394,7 +394,7 @@ resource "azurerm_windows_function_app" "windows-function" {
   }
 
   dynamic "sticky_settings" {
-    for_each = try(var.windows_function.sticky_settings, null) != null ? [1] : []
+    for_each = try(var.windows_function.sticky_settings, null) != null ? [var.windows_function.sticky_settings] : []
     content {
       app_setting_names       = try(sticky_settings.value.app_setting_names, null)
       connection_string_names = try(sticky_settings.value.connection_string_names, null)
