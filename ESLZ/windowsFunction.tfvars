@@ -8,19 +8,21 @@ windows-functions = {
     # client_certificate_enabled                     = false
     # client_certificate_mode                        = "Optional"
     # client_certificate_exclusion_paths             = ""
+    # create_user_managed_identity                   = false
     # daily_memory_time_quota                        = 0
     # enabled                                        = true
     # content_share_force_disabled                   = false
     # functions_extension_version                    = "~4"
     # ftp_publish_basic_authentication_enabled       = false
     # https_only                                     = true
-    # public_network_access_enabled                  = true
+    # inject_root_cert                               = false
+    # public_network_access_enabled                  = false
     # key_vault_reference_identity_id                = ""
     # storage_account_access_key                     = ""
     # storage_account_name                           = ""     # This setting is mandatory if a custom storage account is not created
-    # storage_uses_managed_identity                  = ""
+    # storage_uses_managed_identity                  = false
     # storage_key_vault_secret_id                    = ""
-    # virtual_network_subnet_id                      = ""
+    # virtual_network_subnet_id                      = ""     # The name of the delegated subnet in the L1, or the id
     # webdeploy_publish_basic_authentication_enabled = true
     # vnet_image_pull_enabled                        = true
     # zip_deploy_file                                = ""
@@ -65,8 +67,10 @@ windows-functions = {
       #   #   registry_username = ""
       #   #   registry_password = ""
       #   # }
-      #   dotnet_version              = "9.0"
-      #   use_dotnet_isolated_runtime = "false"
+      #   dotnet_version              = "v9.0"
+      #   # recommend setting true here for dotnet, since the in-process model will be out of support in Nov 2026
+      #   # https://aka.ms/azure-functions-retirements/in-process-model
+      #   use_dotnet_isolated_runtime = false 
       #   java_version                = "17"
       #   node_version                = "20"
       #   python_version              = "3.12"
@@ -80,7 +84,7 @@ windows-functions = {
       #   }
 
       #   cors = {
-      #     allowed_origins     = ""
+      #     allowed_origins     = [ "" ] # Add https://portal.azure.com here to allow testing in the Azure Portal
       #     support_credentials = false
       #   }
 
@@ -291,7 +295,7 @@ windows-functions = {
 
     #   identity = {
     #     type         = ""
-    #     identity_ids = ""
+    #     identity_ids = [ "" ]
     #   }
 
     #   storage_account = {

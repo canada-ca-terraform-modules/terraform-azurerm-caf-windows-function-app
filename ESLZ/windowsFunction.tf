@@ -5,7 +5,7 @@ variable "windows-functions" {
 }
 
 module "windows-function" {
-  source = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-windows-function-app?ref=v1.0.0"
+  source = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-windows-function-app?ref=v1.0.3"
   for_each = var.windows-functions
 
   userDefinedString = each.key
