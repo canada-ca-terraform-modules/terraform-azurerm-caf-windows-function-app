@@ -68,7 +68,9 @@ windows-functions = {
       #   #   registry_password = ""
       #   # }
       #   dotnet_version              = "v9.0"
-      #   use_dotnet_isolated_runtime = "false"
+      #   # recommend setting true here for dotnet, since the in-process model will be out of support in Nov 2026
+      #   # https://aka.ms/azure-functions-retirements/in-process-model
+      #   use_dotnet_isolated_runtime = false 
       #   java_version                = "17"
       #   node_version                = "20"
       #   python_version              = "3.12"
