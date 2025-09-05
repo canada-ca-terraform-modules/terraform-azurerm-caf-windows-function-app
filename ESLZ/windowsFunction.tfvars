@@ -84,7 +84,7 @@ windows-functions = {
       #   }
 
       #   cors = {
-      #     allowed_origins     = ""
+      #     allowed_origins     = [ "" ] # Add https://portal.azure.com here to allow testing in the Azure Portal
       #     support_credentials = false
       #   }
 
