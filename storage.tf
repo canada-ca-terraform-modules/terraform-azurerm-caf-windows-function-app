@@ -1,5 +1,5 @@
 module "storage_account" {
-  source = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-storage_accountV2.git?ref=v1.0.5"
+  source = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-storage_accountV2.git?ref=v1.2.0"
   count = try(var.windows_function.custom_storage_account, null) != null ? 1 : 0
   userDefinedString    = "${var.userDefinedString}-func-sa"
   location             = var.location
