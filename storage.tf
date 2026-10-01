@@ -6,7 +6,7 @@ module "storage_account" {
   env                  = var.env
   resource_groups      = var.resource_groups
   subnets              = var.subnets
-  private_dns_zone_ids = null
+  private_dns_zone_ids = var.private_dns_zone_ids
   tags                 = var.tags
   storage_account = {
     resource_group            = var.windows_function.resource_group
@@ -17,6 +17,7 @@ module "storage_account" {
         resource_group    = var.windows_function.custom_storage_account.resource_group
         subnet            = var.windows_function.custom_storage_account.subnet     
         subresource_names = ["blob"]  
+        local_dns_zone = try(var.windows_function.custom_storage_account.local_dns_zone, null)
       }
     }
   }
