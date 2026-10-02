@@ -1,12 +1,12 @@
 module "storage_account" {
-  source = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-storage_accountV2.git?ref=v1.0.5"
+  source = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-storage_accountV2.git?ref=v1.2.0"
   count = try(var.windows_function.custom_storage_account, null) != null ? 1 : 0
   userDefinedString    = "${var.userDefinedString}-func-sa"
   location             = var.location
   env                  = var.env
   resource_groups      = var.resource_groups
   subnets              = var.subnets
-  private_dns_zone_ids = null
+  private_dns_zone_ids = var.private_dns_zone_ids
   tags                 = var.tags
   storage_account = {
     resource_group            = var.windows_function.resource_group
@@ -17,6 +17,7 @@ module "storage_account" {
         resource_group    = var.windows_function.custom_storage_account.resource_group
         subnet            = var.windows_function.custom_storage_account.subnet     
         subresource_names = ["blob"]  
+        local_dns_zone = try(var.windows_function.custom_storage_account.local_dns_zone, null)
       }
     }
   }

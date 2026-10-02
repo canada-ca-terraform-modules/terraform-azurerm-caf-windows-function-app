@@ -1,13 +1,16 @@
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 5.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | n/a |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | ~> 5.0 |
 | <a name="provider_http"></a> [http](#provider\_http) | n/a |
 
 ## Modules
@@ -15,7 +18,7 @@ No requirements.
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_private_endpoint"></a> [private\_endpoint](#module\_private\_endpoint) | github.com/canada-ca-terraform-modules/terraform-azurerm-caf-private_endpoint.git | v1.0.2 |
-| <a name="module_storage_account"></a> [storage\_account](#module\_storage\_account) | github.com/canada-ca-terraform-modules/terraform-azurerm-caf-storage_accountV2.git | v1.0.5 |
+| <a name="module_storage_account"></a> [storage\_account](#module\_storage\_account) | github.com/canada-ca-terraform-modules/terraform-azurerm-caf-storage_accountV2.git | v1.2.0 |
 | <a name="module_windows-function-umi"></a> [windows-function-umi](#module\_windows-function-umi) | github.com/canada-ca-terraform-modules/terraform-azurerm-caf-user_managed_identity.git | v1.0.0 |
 
 ## Resources
